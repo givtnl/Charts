@@ -265,7 +265,9 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                 context.setFillColor(dataSet.color(atIndex: j).cgColor)
             }
 
-            context.fill(barRect)
+            let bezierPath = UIBezierPath(roundedRect: barRect, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: CGSize(width: 5.0, height: 5.0))
+            context.addPath(bezierPath.cgPath)
+            context.drawPath(using: .fill)
 
             if drawBorder
             {
@@ -324,7 +326,7 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                 let barData = dataProvider.barData
                 else { return }
 
-            let textAlign = TextAlignment.left
+            let textAlign = NSTextAlignment.center
             
             let valueOffsetPlus: CGFloat = 5.0
             var posOffset: CGFloat
@@ -371,10 +373,10 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                             break
                         }
                         
-                        if !viewPortHandler.isInBoundsX(rect.origin.x)
-                        {
-                            continue
-                        }
+                        // if !viewPortHandler.isInBoundsX(rect.origin.x)
+                        // {
+                        //     continue
+                        // }
                         
                         if !viewPortHandler.isInBoundsBottom(rect.origin.y)
                         {
@@ -401,15 +403,25 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                         
                         if dataSet.isDrawValuesEnabled
                         {
+                            let rectOriginX = rect.origin.x
+                            let rectSizeWidth = rect.size.width
+                            let barValue = val
+                            var finalXpos = (rectSizeWidth / 2) + rectOriginX
+                            var textColor = dataSet.valueTextColorAt(j)
+                            
+                            if rectSizeWidth <= 60 {
+                                finalXpos += 60
+                                textColor = dataSet.color(atIndex: j)
+                            }
+
                             drawValue(
                                 context: context,
                                 value: valueText,
-                                xPos: (rect.origin.x + rect.size.width)
-                                    + (val >= 0.0 ? posOffset : negOffset),
+                                xPos: finalXpos,
                                 yPos: y + yOffset,
                                 font: valueFont,
                                 align: textAlign,
-                                color: dataSet.valueTextColorAt(j),
+                                color: textColor,
                                 anchor: CGPoint.zero,
                                 angleRadians: angleRadians)
                         }
